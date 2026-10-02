@@ -1,0 +1,6 @@
+CustomerName,Email,Company,Status,AnnualRevenue,CreatedOn,IsActive,Region
+Contoso Ltd,hello@contoso.com,Contoso,Active,120000,2026-01-15,true,North America
+Fabrikam,info@fabrikam.com,Fabrikam,Pending,45000,2026-02-02,true,Europe
+Northwind,contact@northwind.com,Northwind,Active,87000,2026-02-20,false,APAC
+Wingtip Toys,sales@wingtip.com,Wingtip Toys,Active,220000,2026-03-10,true,North America
+
