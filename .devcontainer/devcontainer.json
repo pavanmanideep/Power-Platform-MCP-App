@@ -1,0 +1,12 @@
+{
+  "name": "Power Platform MCP App",
+  "forwardPorts": [5173],
+  "portsAttributes": {
+    "5173": {
+      "label": "Web app",
+      "onAutoForward": "openBrowser",
+      "visibility": "public"
+    }
+  },
+  "postCreateCommand": "npm install"
+}

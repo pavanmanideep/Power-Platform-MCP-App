@@ -32,6 +32,11 @@ const storeAuthentication = (result: AuthenticationResult) => {
 };
 
 export const initializeAuth = async () => {
+  if (localStorage.getItem('access_token') === 'demo-token') {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('user_profile');
+  }
+
   await msalInitialization;
   const result = await msalInstance.handleRedirectPromise();
   if (result) {
