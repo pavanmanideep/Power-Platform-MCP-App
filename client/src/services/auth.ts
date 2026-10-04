@@ -1,8 +1,10 @@
 import { PublicClientApplication } from '@azure/msal-browser';
+import type { AuthenticationResult } from '@azure/msal-browser';
 
 const clientId = import.meta.env.VITE_AZURE_CLIENT_ID ?? '00000000-0000-0000-0000-000000000000';
 const tenantId = import.meta.env.VITE_AZURE_TENANT_ID ?? '00000000-0000-0000-0000-000000000000';
-const redirectUri = import.meta.env.VITE_AZURE_REDIRECT_URI ?? 'http://localhost:5173';
+const redirectUri = import.meta.env.VITE_AZURE_REDIRECT_URI ?? window.location.origin;
+const placeholderId = '00000000-0000-0000-0000-000000000000';
 
 export const msalInstance = new PublicClientApplication({
   auth: {
@@ -13,33 +15,40 @@ export const msalInstance = new PublicClientApplication({
   cache: { cacheLocation: 'sessionStorage' },
 });
 
-export const signIn = async () => {
-  try {
-    const result = await msalInstance.loginPopup({
-      scopes: ['User.Read', 'openid', 'profile'],
-      prompt: 'select_account',
-    });
+const msalInitialization = msalInstance.initialize();
 
-    localStorage.setItem('access_token', result.accessToken ?? 'demo-token');
-    localStorage.setItem('user_profile', JSON.stringify({
-      id: result.account?.localAccountId ?? 'demo-user',
-      name: result.account?.name ?? 'Demo User',
-      email: result.account?.username ?? 'demo@contoso.com',
-      roles: ['admin', 'importer'],
-    }));
-
-    return result.account;
-  } catch (error) {
-    console.error('MSAL login failed', error);
-    localStorage.setItem('access_token', 'demo-token');
-    localStorage.setItem('user_profile', JSON.stringify({
-      id: 'demo-user',
-      name: 'Demo Administrator',
-      email: 'admin@contoso.com',
-      roles: ['admin', 'importer'],
-    }));
-    return { name: 'Demo Administrator', username: 'admin@contoso.com' };
+const storeAuthentication = (result: AuthenticationResult) => {
+  if (!result.account || !result.accessToken) {
+    throw new Error('Microsoft Entra ID did not return an account and access token.');
   }
+
+  localStorage.setItem('access_token', result.accessToken);
+  localStorage.setItem('user_profile', JSON.stringify({
+    id: result.account.localAccountId,
+    name: result.account.name ?? result.account.username,
+    email: result.account.username,
+    roles: ['admin', 'importer'],
+  }));
+};
+
+export const initializeAuth = async () => {
+  await msalInitialization;
+  const result = await msalInstance.handleRedirectPromise();
+  if (result) {
+    storeAuthentication(result);
+  }
+};
+
+export const signIn = async (): Promise<void> => {
+  if (clientId === placeholderId || tenantId === placeholderId) {
+    throw new Error('Microsoft Entra ID is not configured. Add the client and tenant IDs to the root .env file.');
+  }
+
+  await msalInitialization;
+  await msalInstance.loginRedirect({
+    scopes: ['User.Read', 'openid', 'profile'],
+    prompt: 'select_account',
+  });
 };
 
 export const getCurrentUser = () => {

@@ -1,11 +1,15 @@
-import 'dotenv/config';
 import cors from 'cors';
+import dotenv from 'dotenv';
 import express from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import router from './routes/index.js';
 import logger from './config/logger.js';
 import { errorHandler } from './middleware/errorHandler.js';
+
+dotenv.config({ path: path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../.env') });
 
 const app = express();
 const port = Number(process.env.PORT ?? 4000);

@@ -1,13 +1,22 @@
-import { Button, Card, CardContent, Stack, Typography } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { Alert, Button, Card, CardContent, CircularProgress, Stack, Typography } from '@mui/material';
+import { useState } from 'react';
 import { signIn } from '../services/auth';
 
 export function LoginPage() {
-  const navigate = useNavigate();
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async () => {
-    await signIn();
-    navigate('/');
+    setIsSigningIn(true);
+    setError(null);
+
+    try {
+      await signIn();
+    } catch (loginError) {
+      setError(loginError instanceof Error ? loginError.message : 'Microsoft Entra ID sign-in failed.');
+    } finally {
+      setIsSigningIn(false);
+    }
   };
 
   return (
@@ -20,7 +29,9 @@ export function LoginPage() {
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
             Securely access Dataverse environments and import data without leaving your workflow.
           </Typography>
-          <Button variant="contained" size="large" onClick={handleLogin} fullWidth>
+          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+          <Button variant="contained" size="large" onClick={handleLogin} disabled={isSigningIn} fullWidth>
+            {isSigningIn && <CircularProgress color="inherit" size={20} sx={{ mr: 1 }} />}
             Sign in with Microsoft Entra ID
           </Button>
         </CardContent>
