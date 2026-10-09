@@ -17,6 +17,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
+function LoginRoute() {
+  const isAuthenticated = Boolean(localStorage.getItem('access_token'));
+  return isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />;
+}
+
 function App() {
   return (
     <ThemeProvider theme={appTheme}>
@@ -24,7 +29,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <Routes>
-            <Route path="/login" element={<LoginPage />} />
+            <Route path="/login" element={<LoginRoute />} />
             <Route
               path="/"
               element={
